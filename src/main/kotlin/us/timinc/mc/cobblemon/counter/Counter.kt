@@ -1,8 +1,10 @@
 package us.timinc.mc.cobblemon.counter
 
 import com.cobblemon.mod.common.Cobblemon
+import com.cobblemon.mod.common.api.battles.model.actor.ActorType
 import com.cobblemon.mod.common.api.events.CobblemonEvents
 import com.cobblemon.mod.common.api.events.battles.BattleFaintedEvent
+import com.cobblemon.mod.common.api.events.battles.BattleStartedPostEvent
 import com.cobblemon.mod.common.api.events.pokeball.PokemonCatchRateEvent
 import com.cobblemon.mod.common.api.events.pokemon.PokemonCapturedEvent
 import com.cobblemon.mod.common.api.pokeball.PokeBalls
@@ -21,10 +23,7 @@ import org.apache.logging.log4j.Logger
 import us.timinc.mc.cobblemon.counter.api.CaptureApi
 import us.timinc.mc.cobblemon.counter.command.*
 import us.timinc.mc.cobblemon.counter.config.CounterConfig
-import us.timinc.mc.cobblemon.counter.store.CaptureCount
-import us.timinc.mc.cobblemon.counter.store.CaptureStreak
-import us.timinc.mc.cobblemon.counter.store.KoCount
-import us.timinc.mc.cobblemon.counter.store.KoStreak
+import us.timinc.mc.cobblemon.counter.store.*
 import us.timinc.mc.config.ConfigBuilder
 import java.util.*
 
@@ -44,6 +43,7 @@ object Counter : ModInitializer {
         CobblemonEvents.POKEMON_CAPTURED.subscribe { handlePokemonCapture(it) }
         CobblemonEvents.BATTLE_FAINTED.subscribe { handleWildDefeat(it) }
         CobblemonEvents.POKEMON_CATCH_RATE.subscribe { repeatBallBooster(it) }
+        CobblemonEvents.BATTLE_STARTED_POST.subscribe { handlePokemonEncounter(it) }
         CommandRegistrationCallback.EVENT.register { dispatcher, _, _ ->
             dispatcher.register(
                 literal("counter").then(
@@ -160,6 +160,32 @@ object Counter : ModInitializer {
             ) > 0
         ) {
             event.catchRate *= 2.5f
+        }
+    }
+
+    private fun handlePokemonEncounter(event: BattleStartedPostEvent) {
+        val actors = event.battle.actors
+        val wildActors = actors.filter { it.type === ActorType.WILD }
+        if (wildActors.isEmpty()) return
+        val playerActors = actors.filter { it.type === ActorType.PLAYER }
+        if (playerActors.isEmpty()) return
+
+        val encounteredWilds =
+            wildActors.flatMap { actor -> actor.pokemonList.map { it.originalPokemon.species.name.lowercase() } }
+        val players = playerActors.flatMap { it.getPlayerUUIDs() }.mapNotNull(UUID::getPlayer)
+
+        players.forEach { player ->
+            encounteredWilds.forEach { species ->
+                val data = Cobblemon.playerData.get(player)
+                val encountered: Encounter = data.extraData.getOrPut(Encounter.NAME) { Encounter() } as Encounter
+                if (!encountered.get(species)) {
+                    encountered.add(species)
+                    Cobblemon.playerData.saveSingle(data)
+                    info(
+                        "Player ${player.displayName.string} encountered a $species"
+                    )
+                }
+            }
         }
     }
 
