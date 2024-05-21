@@ -21,7 +21,14 @@ import net.minecraft.text.Text
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import us.timinc.mc.cobblemon.counter.api.CaptureApi
-import us.timinc.mc.cobblemon.counter.command.*
+import us.timinc.mc.cobblemon.counter.command.capture.CaptureCountCommand
+import us.timinc.mc.cobblemon.counter.command.capture.CaptureResetCommand
+import us.timinc.mc.cobblemon.counter.command.capture.CaptureStreakCommand
+import us.timinc.mc.cobblemon.counter.command.capture.CaptureTotalCommand
+import us.timinc.mc.cobblemon.counter.command.ko.KoCountCommand
+import us.timinc.mc.cobblemon.counter.command.ko.KoResetCommand
+import us.timinc.mc.cobblemon.counter.command.ko.KoStreakCommand
+import us.timinc.mc.cobblemon.counter.command.ko.KoTotalCommand
 import us.timinc.mc.cobblemon.counter.config.CounterConfig
 import us.timinc.mc.cobblemon.counter.store.*
 import us.timinc.mc.config.ConfigBuilder
