@@ -4,14 +4,12 @@ import com.mojang.brigadier.context.CommandContext
 import net.minecraft.command.argument.EntityArgumentType
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.command.ServerCommandSource
-import net.minecraft.text.Text
-import us.timinc.mc.cobblemon.counter.api.CaptureApi
 
-object CaptureStreakCommand {
+abstract class PlayerCommandExecutor {
     fun withPlayer(ctx: CommandContext<ServerCommandSource>): Int {
         return check(
             ctx,
-            EntityArgumentType.getPlayer(ctx, "player"),
+            EntityArgumentType.getPlayer(ctx, "player")
         )
     }
 
@@ -24,11 +22,5 @@ object CaptureStreakCommand {
         } ?: 0
     }
 
-    private fun check(ctx: CommandContext<ServerCommandSource>, player: PlayerEntity): Int {
-        val streakData = CaptureApi.getStreak(player)
-        val species = streakData.first
-        val count = streakData.second
-        ctx.source.sendMessage(Text.translatable("counter.capture.streak", player.displayName, count, species))
-        return count
-    }
+    abstract fun check(ctx: CommandContext<ServerCommandSource>, player: PlayerEntity): Int
 }
