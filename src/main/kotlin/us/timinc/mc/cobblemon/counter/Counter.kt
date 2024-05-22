@@ -21,6 +21,7 @@ import net.minecraft.text.Text
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import us.timinc.mc.cobblemon.counter.api.CaptureApi
+import us.timinc.mc.cobblemon.counter.api.KoApi
 import us.timinc.mc.cobblemon.counter.command.capture.CaptureCountCommand
 import us.timinc.mc.cobblemon.counter.command.capture.CaptureResetCommand
 import us.timinc.mc.cobblemon.counter.command.capture.CaptureStreakCommand
@@ -39,7 +40,7 @@ object Counter : ModInitializer {
     const val MOD_ID = "cobbled_counter"
 
     private var logger: Logger = LogManager.getLogger(MOD_ID)
-    private var config: CounterConfig = ConfigBuilder.load(CounterConfig::class.java, MOD_ID)
+    var config: CounterConfig = ConfigBuilder.load(CounterConfig::class.java, MOD_ID)
 
     override fun onInitialize() {
         PlayerDataExtensionRegistry.register(KoCount.NAME, KoCount::class.java)
@@ -198,32 +199,7 @@ object Counter : ModInitializer {
 
     private fun handlePokemonCapture(event: PokemonCapturedEvent) {
         val species = event.pokemon.species.name.lowercase()
-
-        val data = Cobblemon.playerData.get(event.player)
-
-        val captureCount: CaptureCount = data.extraData.getOrPut(CaptureCount.NAME) { CaptureCount() } as CaptureCount
-        captureCount.add(species)
-
-        val captureStreak: CaptureStreak =
-            data.extraData.getOrPut(CaptureStreak.NAME) { CaptureStreak() } as CaptureStreak
-        captureStreak.add(species)
-
-        info(
-            "Player ${event.player.displayName.string} captured a $species streak(${captureStreak.count}) count(${
-                captureCount.get(
-                    species
-                )
-            })"
-        )
-        if (config.broadcastCapturesToPlayer) {
-            event.player.sendMessage(
-                Text.translatable(
-                    "counter.capture.confirm", species, captureCount.get(species), captureStreak.count
-                )
-            )
-        }
-
-        Cobblemon.playerData.saveSingle(data)
+        CaptureApi.add(event.player, species)
     }
 
     private fun handleWildDefeat(event: BattleFaintedEvent) {
@@ -235,33 +211,11 @@ object Counter : ModInitializer {
         val species = targetPokemon.species.name.lowercase()
 
         event.battle.playerUUIDs.mapNotNull(UUID::getPlayer).forEach { player ->
-            val data = Cobblemon.playerData.get(player)
-            val koCount: KoCount = data.extraData.getOrPut(KoCount.NAME) { KoCount() } as KoCount
-            val koStreak: KoStreak = data.extraData.getOrPut(KoStreak.NAME) { KoStreak() } as KoStreak
-
-            koCount.add(species)
-            koStreak.add(species)
-
-            info(
-                "Player ${player.displayName.string} KO'd a $species streak(${koStreak.count}) count(${
-                    koCount.get(
-                        species
-                    )
-                })"
-            )
-            if (config.broadcastKosToPlayer) {
-                player.sendMessage(
-                    Text.translatable(
-                        "counter.ko.confirm", species, koCount.get(species), koStreak.count
-                    )
-                )
-            }
-
-            Cobblemon.playerData.saveSingle(data)
+            KoApi.add(player, species)
         }
     }
 
-    private fun info(msg: String) {
+    fun info(msg: String) {
         if (!config.debug) return
         logger.info(msg)
     }
