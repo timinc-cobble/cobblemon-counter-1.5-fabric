@@ -22,6 +22,10 @@ class Encounter : PlayerDataExtension {
         return encounters.getOrDefault(speciesName, false)
     }
 
+    fun total(): Int {
+        return encounters.values.filter { it }.size
+    }
+
     override fun deserialize(json: JsonObject): Encounter {
         val encounterData = json.getAsJsonObject("encounters")
         for (speciesName in encounterData.keySet()) {

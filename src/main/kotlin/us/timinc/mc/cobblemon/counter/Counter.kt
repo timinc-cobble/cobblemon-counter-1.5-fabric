@@ -1,6 +1,5 @@
 package us.timinc.mc.cobblemon.counter
 
-import com.cobblemon.mod.common.Cobblemon
 import com.cobblemon.mod.common.api.battles.model.actor.ActorType
 import com.cobblemon.mod.common.api.events.CobblemonEvents
 import com.cobblemon.mod.common.api.events.battles.BattleFaintedEvent
@@ -10,17 +9,20 @@ import com.cobblemon.mod.common.api.events.pokemon.PokemonCapturedEvent
 import com.cobblemon.mod.common.api.pokeball.PokeBalls
 import com.cobblemon.mod.common.api.storage.player.PlayerDataExtensionRegistry
 import com.cobblemon.mod.common.command.argument.PokemonArgumentType
+import com.cobblemon.mod.common.entity.pokemon.PokemonEntity
 import com.cobblemon.mod.common.util.getPlayer
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
+import net.fabricmc.fabric.api.event.player.UseEntityCallback
 import net.minecraft.command.argument.EntityArgumentType
 import net.minecraft.server.command.CommandManager.argument
 import net.minecraft.server.command.CommandManager.literal
 import net.minecraft.server.network.ServerPlayerEntity
-import net.minecraft.text.Text
+import net.minecraft.util.ActionResult
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import us.timinc.mc.cobblemon.counter.api.CaptureApi
+import us.timinc.mc.cobblemon.counter.api.EncounterApi
 import us.timinc.mc.cobblemon.counter.api.KoApi
 import us.timinc.mc.cobblemon.counter.command.capture.CaptureCountCommand
 import us.timinc.mc.cobblemon.counter.command.capture.CaptureResetCommand
@@ -31,7 +33,10 @@ import us.timinc.mc.cobblemon.counter.command.ko.KoResetCommand
 import us.timinc.mc.cobblemon.counter.command.ko.KoStreakCommand
 import us.timinc.mc.cobblemon.counter.command.ko.KoTotalCommand
 import us.timinc.mc.cobblemon.counter.config.CounterConfig
-import us.timinc.mc.cobblemon.counter.store.*
+import us.timinc.mc.cobblemon.counter.store.CaptureCount
+import us.timinc.mc.cobblemon.counter.store.CaptureStreak
+import us.timinc.mc.cobblemon.counter.store.KoCount
+import us.timinc.mc.cobblemon.counter.store.KoStreak
 import us.timinc.mc.config.ConfigBuilder
 import java.util.*
 
@@ -52,6 +57,14 @@ object Counter : ModInitializer {
         CobblemonEvents.BATTLE_FAINTED.subscribe { handleWildDefeat(it) }
         CobblemonEvents.POKEMON_CATCH_RATE.subscribe { repeatBallBooster(it) }
         CobblemonEvents.BATTLE_STARTED_POST.subscribe { handlePokemonEncounter(it) }
+        UseEntityCallback.EVENT.register { player, world, _, entity, _ ->
+            if (entity !is PokemonEntity) return@register ActionResult.PASS
+            if (!world.isClient) {
+                val species = entity.pokemon.species.name.toLowerCase()
+                EncounterApi.add(player, species)
+            }
+            return@register ActionResult.SUCCESS
+        }
         CommandRegistrationCallback.EVENT.register { dispatcher, _, _ ->
             dispatcher.register(
                 literal("counter").then(
@@ -184,15 +197,7 @@ object Counter : ModInitializer {
 
         players.forEach { player ->
             encounteredWilds.forEach { species ->
-                val data = Cobblemon.playerData.get(player)
-                val encountered: Encounter = data.extraData.getOrPut(Encounter.NAME) { Encounter() } as Encounter
-                if (!encountered.get(species)) {
-                    encountered.add(species)
-                    Cobblemon.playerData.saveSingle(data)
-                    info(
-                        "Player ${player.displayName.string} encountered a $species"
-                    )
-                }
+                EncounterApi.add(player, species)
             }
         }
     }
