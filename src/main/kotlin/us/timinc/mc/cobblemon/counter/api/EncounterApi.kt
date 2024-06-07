@@ -1,3 +1,5 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package us.timinc.mc.cobblemon.counter.api
 
 import com.cobblemon.mod.common.Cobblemon
@@ -9,6 +11,9 @@ import us.timinc.mc.cobblemon.counter.store.Encounter
 
 object EncounterApi {
     fun add(player: PlayerEntity, species: String) {
+        val alreadyEncountered = check(player,species)
+        if (alreadyEncountered) return
+
         val playerData = Cobblemon.playerData.get(player)
         val encounter: Encounter = playerData.extraData.getOrPut(Encounter.NAME) { Encounter() } as Encounter
         encounter.add(species)
