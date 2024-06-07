@@ -11,6 +11,7 @@ import com.cobblemon.mod.common.api.storage.player.PlayerDataExtensionRegistry
 import com.cobblemon.mod.common.command.argument.PokemonArgumentType
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity
 import com.cobblemon.mod.common.util.getPlayer
+import com.cobblemon.mod.common.util.server
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.event.player.UseEntityCallback
@@ -33,10 +34,7 @@ import us.timinc.mc.cobblemon.counter.command.ko.KoResetCommand
 import us.timinc.mc.cobblemon.counter.command.ko.KoStreakCommand
 import us.timinc.mc.cobblemon.counter.command.ko.KoTotalCommand
 import us.timinc.mc.cobblemon.counter.config.CounterConfig
-import us.timinc.mc.cobblemon.counter.store.CaptureCount
-import us.timinc.mc.cobblemon.counter.store.CaptureStreak
-import us.timinc.mc.cobblemon.counter.store.KoCount
-import us.timinc.mc.cobblemon.counter.store.KoStreak
+import us.timinc.mc.cobblemon.counter.store.*
 import us.timinc.mc.config.ConfigBuilder
 import java.util.*
 
@@ -52,11 +50,34 @@ object Counter : ModInitializer {
         PlayerDataExtensionRegistry.register(KoStreak.NAME, KoStreak::class.java)
         PlayerDataExtensionRegistry.register(CaptureCount.NAME, CaptureCount::class.java)
         PlayerDataExtensionRegistry.register(CaptureStreak.NAME, CaptureStreak::class.java)
+        PlayerDataExtensionRegistry.register(Encounter.NAME, Encounter::class.java)
 
         CobblemonEvents.POKEMON_CAPTURED.subscribe { handlePokemonCapture(it) }
         CobblemonEvents.BATTLE_FAINTED.subscribe { handleWildDefeat(it) }
         CobblemonEvents.POKEMON_CATCH_RATE.subscribe { repeatBallBooster(it) }
         CobblemonEvents.BATTLE_STARTED_POST.subscribe { handlePokemonEncounter(it) }
+        CobblemonEvents.EVOLUTION_COMPLETE.subscribe { evt ->
+            val species = evt.pokemon.species.name.toLowerCase()
+            val player = evt.pokemon.getOwnerPlayer() ?: return@subscribe
+            EncounterApi.add(player, species)
+        }
+        CobblemonEvents.STARTER_CHOSEN.subscribe { evt ->
+            val species = evt.pokemon.species.name.toLowerCase()
+            val player = evt.player
+            EncounterApi.add(player, species)
+        }
+        CobblemonEvents.TRADE_COMPLETED.subscribe { evt ->
+            val species1 = evt.tradeParticipant1Pokemon.species.name.toLowerCase()
+            val species2 = evt.tradeParticipant2Pokemon.species.name.toLowerCase()
+            val player1 = server()?.playerManager?.getPlayer(evt.tradeParticipant1.uuid)
+            val player2 = server()?.playerManager?.getPlayer(evt.tradeParticipant2.uuid)
+            if (player1 != null) {
+                EncounterApi.add(player1, species1)
+            }
+            if (player2 != null) {
+                EncounterApi.add(player2, species2)
+            }
+        }
         UseEntityCallback.EVENT.register { player, world, _, entity, _ ->
             if (entity !is PokemonEntity) return@register ActionResult.PASS
             if (!world.isClient) {
