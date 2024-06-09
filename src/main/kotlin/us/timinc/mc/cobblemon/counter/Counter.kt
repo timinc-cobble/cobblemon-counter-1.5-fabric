@@ -65,6 +65,7 @@ object Counter : ModInitializer {
             val species = evt.pokemon.species.name.toLowerCase()
             val player = evt.player
             EncounterApi.add(player, species)
+            CaptureApi.add(player, species)
         }
         CobblemonEvents.TRADE_COMPLETED.subscribe { evt ->
             val species1 = evt.tradeParticipant1Pokemon.species.name.toLowerCase()
