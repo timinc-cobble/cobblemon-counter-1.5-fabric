@@ -16,9 +16,11 @@ import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.event.player.UseEntityCallback
 import net.minecraft.command.argument.EntityArgumentType
+import net.minecraft.entity.EquipmentSlot
 import net.minecraft.server.command.CommandManager.argument
 import net.minecraft.server.command.CommandManager.literal
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.text.Text
 import net.minecraft.util.ActionResult
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -33,9 +35,9 @@ import us.timinc.mc.cobblemon.counter.command.ko.KoCountCommand
 import us.timinc.mc.cobblemon.counter.command.ko.KoResetCommand
 import us.timinc.mc.cobblemon.counter.command.ko.KoStreakCommand
 import us.timinc.mc.cobblemon.counter.command.ko.KoTotalCommand
+import us.timinc.mc.cobblemon.counter.config.ConfigBuilder
 import us.timinc.mc.cobblemon.counter.config.CounterConfig
 import us.timinc.mc.cobblemon.counter.store.*
-import us.timinc.mc.config.ConfigBuilder
 import java.util.*
 
 object Counter : ModInitializer {
@@ -79,11 +81,30 @@ object Counter : ModInitializer {
                 EncounterApi.add(player2, species2)
             }
         }
-        UseEntityCallback.EVENT.register { player, world, _, entity, _ ->
+        UseEntityCallback.EVENT.register { player, world, hand, entity, _ ->
             if (entity !is PokemonEntity) return@register ActionResult.PASS
+            if (!entity.pokemon.isWild()) {
+                return@register ActionResult.PASS
+            }
+            if (!player.getEquippedStack(EquipmentSlot.MAINHAND).isEmpty) {
+                return@register ActionResult.PASS
+            }
             if (!world.isClient) {
                 val species = entity.pokemon.species.name.toLowerCase()
-                EncounterApi.add(player, species)
+                val alreadyEncountered = EncounterApi.check(player, species)
+                if (alreadyEncountered) {
+                    if (config.broadcastEncountersToPlayer) {
+                        val alreadyCaught = CaptureApi.getCount(player, species) > 0
+                        player.sendMessage(
+                            Text.translatable(
+                                if (alreadyCaught) "counter.encounter.alreadyCaught" else "counter.encounter.alreadyEncountered",
+                                species
+                            )
+                        )
+                    }
+                } else {
+                    EncounterApi.add(player, species)
+                }
             }
             return@register ActionResult.SUCCESS
         }

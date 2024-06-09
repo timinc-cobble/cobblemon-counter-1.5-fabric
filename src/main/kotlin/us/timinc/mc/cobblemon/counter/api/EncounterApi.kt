@@ -11,8 +11,9 @@ import us.timinc.mc.cobblemon.counter.store.Encounter
 
 object EncounterApi {
     fun add(player: PlayerEntity, species: String) {
-        val alreadyEncountered = check(player,species)
-        if (alreadyEncountered) return
+        if (check(player, species)) {
+            return
+        }
 
         val playerData = Cobblemon.playerData.get(player)
         val encounter: Encounter = playerData.extraData.getOrPut(Encounter.NAME) { Encounter() } as Encounter
