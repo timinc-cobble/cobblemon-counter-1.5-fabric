@@ -1,4 +1,4 @@
-package us.timinc.mc.cobblemon.counter.command
+package us.timinc.mc.cobblemon.counter.command.ko
 
 import com.mojang.brigadier.context.CommandContext
 import net.minecraft.command.argument.EntityArgumentType

@@ -5,10 +5,8 @@ import com.mojang.brigadier.context.CommandContext
 import net.minecraft.command.argument.EntityArgumentType
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.command.ServerCommandSource
-import net.minecraft.text.Text
-import us.timinc.mc.cobblemon.counter.api.KoApi
 
-object KoCountCommand {
+abstract class SpeciesCommandExecutor {
     fun withPlayer(ctx: CommandContext<ServerCommandSource>): Int {
         return check(
             ctx,
@@ -27,9 +25,5 @@ object KoCountCommand {
         } ?: 0
     }
 
-    private fun check(ctx: CommandContext<ServerCommandSource>, player: PlayerEntity, species: String): Int {
-        val score = KoApi.getCount(player, species)
-        ctx.source.sendMessage(Text.translatable("counter.ko.count", player.displayName, score, species))
-        return score
-    }
+    abstract fun check(ctx: CommandContext<ServerCommandSource>, player: PlayerEntity, species: String): Int
 }
