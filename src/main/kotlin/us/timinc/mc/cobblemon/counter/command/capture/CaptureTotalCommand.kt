@@ -7,7 +7,7 @@ import net.minecraft.text.Text
 import us.timinc.mc.cobblemon.counter.api.CaptureApi
 import us.timinc.mc.cobblemon.counter.command.PlayerCommandExecutor
 
-object CaptureTotalCommand : PlayerCommandExecutor() {
+object CaptureTotalCommand : PlayerCommandExecutor(listOf("capture", "total")) {
     override fun check(ctx: CommandContext<ServerCommandSource>, player: PlayerEntity): Int {
         val score = CaptureApi.getTotal(player)
         ctx.source.sendMessage(Text.translatable("counter.capture.total", player.displayName, score))

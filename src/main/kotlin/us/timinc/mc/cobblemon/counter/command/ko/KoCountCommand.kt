@@ -7,7 +7,7 @@ import net.minecraft.text.Text
 import us.timinc.mc.cobblemon.counter.api.KoApi
 import us.timinc.mc.cobblemon.counter.command.SpeciesCommandExecutor
 
-object KoCountCommand : SpeciesCommandExecutor() {
+object KoCountCommand : SpeciesCommandExecutor(listOf("ko", "count")) {
     override fun check(ctx: CommandContext<ServerCommandSource>, player: PlayerEntity, species: String): Int {
         val score = KoApi.getCount(player, species)
         ctx.source.sendMessage(Text.translatable("counter.ko.count", player.displayName, score, species))

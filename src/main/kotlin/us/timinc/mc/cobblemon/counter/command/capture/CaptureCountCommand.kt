@@ -7,7 +7,7 @@ import net.minecraft.text.Text
 import us.timinc.mc.cobblemon.counter.api.CaptureApi
 import us.timinc.mc.cobblemon.counter.command.SpeciesCommandExecutor
 
-object CaptureCountCommand: SpeciesCommandExecutor() {
+object CaptureCountCommand : SpeciesCommandExecutor(listOf("capture", "count")) {
     override fun check(ctx: CommandContext<ServerCommandSource>, player: PlayerEntity, species: String): Int {
         val score = CaptureApi.getCount(player, species)
         ctx.source.sendMessage(Text.translatable("counter.capture.count", player.displayName, score, species))
