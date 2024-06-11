@@ -10,6 +10,6 @@ object StarterChosen {
         val species = evt.pokemon.species.name.lowercase(Locale.getDefault())
         val player = evt.player
         EncounterApi.add(player, species)
-        CaptureApi.add(player, species)
+        CaptureApi.add(player, species, true)
     }
 }
