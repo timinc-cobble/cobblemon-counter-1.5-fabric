@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "cobblemon_counter",
-  "version": "1.5-fabric-1.1.2",
+  "version": "1.5-fabric-1.1.3",
   "name": "Cobblemon Counter",
   "description": "Counts things in Cobblemon",
   "authors": [
