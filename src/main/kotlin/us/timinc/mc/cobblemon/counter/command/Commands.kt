@@ -8,6 +8,9 @@ import us.timinc.mc.cobblemon.counter.command.capture.CaptureCountCommand
 import us.timinc.mc.cobblemon.counter.command.capture.CaptureResetCommand
 import us.timinc.mc.cobblemon.counter.command.capture.CaptureStreakCommand
 import us.timinc.mc.cobblemon.counter.command.capture.CaptureTotalCommand
+import us.timinc.mc.cobblemon.counter.command.encounter.EncounterCheckCommand
+import us.timinc.mc.cobblemon.counter.command.encounter.EncounterResetCommand
+import us.timinc.mc.cobblemon.counter.command.encounter.EncounterTotalCommand
 import us.timinc.mc.cobblemon.counter.command.ko.KoCountCommand
 import us.timinc.mc.cobblemon.counter.command.ko.KoResetCommand
 import us.timinc.mc.cobblemon.counter.command.ko.KoStreakCommand
@@ -28,5 +31,9 @@ object Commands {
         CaptureResetCommand.register(dispatcher)
         CaptureStreakCommand.register(dispatcher)
         CaptureTotalCommand.register(dispatcher)
+
+        EncounterCheckCommand.register(dispatcher)
+        EncounterResetCommand.register(dispatcher)
+        EncounterTotalCommand.register(dispatcher)
     }
 }
