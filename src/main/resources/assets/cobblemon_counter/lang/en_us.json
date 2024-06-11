@@ -14,7 +14,6 @@
     "counter.capture.confirm": "Captured %d (%d/%d)",
     "counter.ko.confirm": "KO'd %d (%d/%d)",
     "counter.encounter.confirm": "You've encountered a %d for the first time",
-    "counter.encounter.alreadyEncountered": "You've already encountered a %d",
     "counter.encounter.alreadyCaught": "You've already caught a %d",
     "counter.encounter.total": "%d has encountered %d total Pokemon",
     "counter.encounter.all.reset": "Encounter data reset for %d",
