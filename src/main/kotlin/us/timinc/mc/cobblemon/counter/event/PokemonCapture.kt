@@ -7,6 +7,7 @@ import us.timinc.mc.cobblemon.counter.api.EncounterApi
 object PokemonCapture {
     fun handle(event: PokemonCapturedEvent) {
         val species = event.pokemon.species.name.lowercase()
+        EncounterApi.add(event.player, species)
         CaptureApi.add(event.player, species)
     }
 }
