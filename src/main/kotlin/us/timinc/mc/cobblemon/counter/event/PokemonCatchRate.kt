@@ -12,7 +12,7 @@ object PokemonCatchRate {
         if (thrower !is ServerPlayerEntity) return
 
         if (event.pokeBallEntity.pokeBall == PokeBalls.REPEAT_BALL && CaptureApi.getCount(
-                thrower, event.pokemonEntity.pokemon.species.name.lowercase()
+                thrower, event.pokemonEntity.pokemon.species
             ) > 0
         ) {
             event.catchRate *= 2.5f

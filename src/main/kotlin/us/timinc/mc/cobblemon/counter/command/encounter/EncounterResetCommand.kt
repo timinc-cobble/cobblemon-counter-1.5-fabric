@@ -10,7 +10,7 @@ import net.minecraft.text.Text
 import us.timinc.mc.cobblemon.counter.api.EncounterApi
 import us.timinc.mc.cobblemon.counter.command.CommandExecutor
 
-object EncounterResetCommand: CommandExecutor() {
+object EncounterResetCommand : CommandExecutor() {
     override fun register(dispatcher: CommandDispatcher<ServerCommandSource>) {
         dispatcher.register(
             literal("counter").then(
