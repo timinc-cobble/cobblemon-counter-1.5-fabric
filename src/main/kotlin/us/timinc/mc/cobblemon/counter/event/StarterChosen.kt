@@ -7,7 +7,7 @@ import java.util.*
 
 object StarterChosen {
     fun handle(evt: StarterChosenEvent) {
-        val species = evt.pokemon.species.name.lowercase(Locale.getDefault())
+        val species = evt.pokemon.species
         val player = evt.player
         EncounterApi.add(player, species)
         CaptureApi.add(player, species, true)

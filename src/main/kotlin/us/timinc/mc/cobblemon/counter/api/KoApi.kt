@@ -1,15 +1,26 @@
+@file:Suppress("MemberVisibilityCanBePrivate", "unused")
+
 package us.timinc.mc.cobblemon.counter.api
 
 import com.cobblemon.mod.common.Cobblemon
+import com.cobblemon.mod.common.pokemon.Species
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.text.Text
+import net.minecraft.util.Identifier
 import us.timinc.mc.cobblemon.counter.Counter.config
 import us.timinc.mc.cobblemon.counter.Counter.info
 import us.timinc.mc.cobblemon.counter.store.KoCount
 import us.timinc.mc.cobblemon.counter.store.KoStreak
-import us.timinc.mc.cobblemon.counter.util.Util
 
 object KoApi {
+    fun add(player: PlayerEntity, species: Species) {
+        add(player, species.resourceIdentifier)
+    }
+
+    fun add(player: PlayerEntity, species: Identifier) {
+        add(player, species.path)
+    }
+
     fun add(player: PlayerEntity, species: String) {
         val data = Cobblemon.playerData.get(player)
         val koCount: KoCount = data.extraData.getOrPut(KoCount.NAME) { KoCount() } as KoCount
@@ -27,7 +38,7 @@ object KoApi {
         if (config.broadcastKosToPlayer) {
             player.sendMessage(
                 Text.translatable(
-                    "counter.ko.confirm", Text.translatable("cobblemon.species.${Util.cleanSpeciesNameForTranslation(species)}.name"), newCount, newStreak
+                    "counter.ko.confirm", Text.translatable("cobblemon.species.${species}.name"), newCount, newStreak
                 )
             )
         }
@@ -38,6 +49,14 @@ object KoApi {
     fun getTotal(player: PlayerEntity): Int {
         val playerData = Cobblemon.playerData.get(player)
         return (playerData.extraData.getOrPut(KoCount.NAME) { KoCount() } as KoCount).total()
+    }
+
+    fun getCount(player: PlayerEntity, species: Species): Int {
+        return getCount(player, species.resourceIdentifier)
+    }
+
+    fun getCount(player: PlayerEntity, species: Identifier): Int {
+        return getCount(player, species.path)
     }
 
     fun getCount(player: PlayerEntity, species: String): Int {

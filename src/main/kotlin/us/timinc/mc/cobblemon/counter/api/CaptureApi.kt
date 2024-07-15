@@ -1,15 +1,26 @@
+@file:Suppress("MemberVisibilityCanBePrivate", "unused")
+
 package us.timinc.mc.cobblemon.counter.api
 
 import com.cobblemon.mod.common.Cobblemon
+import com.cobblemon.mod.common.pokemon.Species
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.text.Text
+import net.minecraft.util.Identifier
 import us.timinc.mc.cobblemon.counter.Counter.config
 import us.timinc.mc.cobblemon.counter.Counter.info
 import us.timinc.mc.cobblemon.counter.store.CaptureCount
 import us.timinc.mc.cobblemon.counter.store.CaptureStreak
-import us.timinc.mc.cobblemon.counter.util.Util
 
 object CaptureApi {
+    fun add(player: PlayerEntity, species: Species, preserveStreak: Boolean = false) {
+        add(player, species.resourceIdentifier, preserveStreak)
+    }
+
+    fun add(player: PlayerEntity, species: Identifier, preserveStreak: Boolean = false) {
+        add(player, species.path, preserveStreak)
+    }
+
     fun add(player: PlayerEntity, species: String, preserveStreak: Boolean = false) {
         val data = Cobblemon.playerData.get(player)
 
@@ -19,7 +30,7 @@ object CaptureApi {
 
         captureCount.add(species)
         if (!preserveStreak)
-        captureStreak.add(species)
+            captureStreak.add(species)
 
         val newCount = captureCount.get(species)
         val newStreak = captureStreak.get(species)
@@ -30,7 +41,10 @@ object CaptureApi {
         if (config.broadcastCapturesToPlayer) {
             player.sendMessage(
                 Text.translatable(
-                    "counter.capture.confirm", Text.translatable("cobblemon.species.${Util.cleanSpeciesNameForTranslation(species)}.name"), newCount, newStreak
+                    "counter.capture.confirm",
+                    Text.translatable("cobblemon.species.${species}.name"),
+                    newCount,
+                    newStreak
                 )
             )
         }
@@ -41,6 +55,14 @@ object CaptureApi {
     fun getTotal(player: PlayerEntity): Int {
         val playerData = Cobblemon.playerData.get(player)
         return (playerData.extraData.getOrPut(CaptureCount.NAME) { CaptureCount() } as CaptureCount).total()
+    }
+
+    fun getCount(player: PlayerEntity, species: Species): Int {
+        return getCount(player, species.resourceIdentifier)
+    }
+
+    fun getCount(player: PlayerEntity, species: Identifier): Int {
+        return getCount(player, species.path)
     }
 
     fun getCount(player: PlayerEntity, species: String): Int {

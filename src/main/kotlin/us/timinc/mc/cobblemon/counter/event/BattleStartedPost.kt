@@ -15,7 +15,7 @@ object BattleStartedPost {
         if (playerActors.isEmpty()) return
 
         val encounteredWilds =
-            wildActors.flatMap { actor -> actor.pokemonList.map { it.originalPokemon.species.name.lowercase() } }
+            wildActors.flatMap { actor -> actor.pokemonList.map { it.originalPokemon.species } }
         val players = playerActors.flatMap { it.getPlayerUUIDs() }.mapNotNull(UUID::getPlayer)
 
         players.forEach { player ->
